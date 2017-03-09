@@ -10,7 +10,18 @@ class Serve
     
     public function __construct($path = null)
     {
-        $this->path = $path;
+        if (!empty($path)) {
+            $dir = dirname($path);
+            if (!file_exists($dir)) {
+                
+                if (@mkdir($dir, 0755, true)) {
+                    $this->path = $path;
+                }
+                
+            } else {
+                $this->path = $path;
+            }
+        }
     }
     
     public function css(array $files)
