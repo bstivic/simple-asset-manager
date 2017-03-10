@@ -37,6 +37,27 @@ class Serve
     {
         header('Content-type: text/css');
         $minify = new Minify\CSS();
+        $minify->setMaxImportSize(2048);
+        
+        $extensions = array(
+                        'gif' => 'data:image/gif',
+                        'png' => 'data:image/png',
+                        'jpe' => 'data:image/jpeg',
+                        'jpg' => 'data:image/jpeg',
+                        'jpeg' => 'data:image/jpeg',
+                        'svg' => 'data:image/svg+xml',
+                        'woff' => 'data:application/x-font-woff',
+                        'ttf' => 'data:application/x-font-ttf',
+                        'ttc' => 'data:application/x-font-ttf',
+                        'otf' => 'data:application/x-font-otf',
+                        'eot' => 'data:application/vnd.ms-fontobject',
+                        'woff2' => 'data:application/font-woff2',
+                        'tif' => 'image/tiff',
+                        'tiff' => 'image/tiff',
+                        'xbm' => 'image/x-xbitmap',
+                    );
+        
+        $minify->setImportExtensions($extensions);
         
         return $this->offer($minify, $files);
     }
