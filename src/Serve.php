@@ -8,11 +8,11 @@ class Serve
 {
     public $path;
     public $opts = array(
-                      'etag' => true,
-                      'timeout' => 604800,
-                      'maxAge' => 315360000,
-                      'gzip' => false
-                      );
+                        'etag' => true,
+                        'timeout' => 604800,
+                        'maxAge' => 315360000,
+                        'gzip' => false
+                        );
     
     
     public function __construct($path = null, $opts = array())
@@ -78,7 +78,7 @@ class Serve
         
         $this->http_header();
         if ($this->opts['etag']) {
-            header("Etag: " . md5($buffer));
+            header("Etag: ".md5($buffer));
         }
         
         return $buffer;
@@ -86,9 +86,9 @@ class Serve
     
     private function http_header()
     {
-        header("Expires: ". gmdate('D, d M Y H:i:s', time() + $this->opts['timeout']) ." GMT");
-        header("Last-Modified: ". gmdate('D, d M Y H:i:s', time()) ." GMT");
-        header("Cache-Control: max-age=" . $this->opts['maxAge']);
+        header("Expires: ".gmdate('D, d M Y H:i:s', time() + $this->opts['timeout'])." GMT");
+        header("Last-Modified: ".gmdate('D, d M Y H:i:s', time())." GMT");
+        header("Cache-Control: max-age=".$this->opts['maxAge']);
         header("Pragma: cache");
         session_cache_limiter('public');
     }
