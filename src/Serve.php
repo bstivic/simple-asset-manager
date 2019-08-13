@@ -92,7 +92,15 @@ class Serve
             )
         );
     }
-
+    
+    /**
+     * offer
+     *
+     * @param Minify\Minify $minify
+     * @param array $files
+     * @param array $header
+     * @return string
+     */
     private function offer($minify, $files, $header = array())
     {
         header("Expires: ".gmdate('D, d M Y H:i:s', time() + $this->opts['timeout'])." GMT", true);
