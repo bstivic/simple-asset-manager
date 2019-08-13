@@ -1,9 +1,12 @@
 <?php
 
-namespace App;
+namespace Simple\Asset;
 
 use MatthiasMullie\Minify;
 
+/**
+ * wrapper for MatthiasMullie\Minify
+ */
 class Serve
 {
     public $path;
@@ -13,83 +16,110 @@ class Serve
                         'maxAge' => 315360000,
                         'gzip' => false
                         );
-    
-    
+
+
     public function __construct($path = null, $opts = array())
     {
         if (!empty($path)) {
             $dir = dirname($path);
             if (!file_exists($dir)) {
-                if (@mkdir($dir, 0755, true)) {
-                    $this->path = $path;
-                }
-            } else {
-                $this->path = $path;
+                @mkdir($dir, 0755, true);
             }
         }
-        
-        if (!empty($opts)) {
-            $this->opts = array_merge($this->opts, $opts);
-        }
+
+        $this->path = $path;
+
+        $this->opts = array_merge($this->opts, $opts);
     }
-    
+
+    /**
+     * css loader
+     *
+     * @param array $files
+     * @return string
+     */
     public function css(array $files)
     {
-        header('Content-type: text/css');
         $minify = new Minify\CSS();
         $minify->setMaxImportSize(2048);
-        
-        $extensions = array(
-                        'gif' => 'data:image/gif',
-                        'png' => 'data:image/png',
-                        'jpe' => 'data:image/jpeg',
-                        'jpg' => 'data:image/jpeg',
-                        'jpeg' => 'data:image/jpeg',
-                        'svg' => 'data:image/svg+xml',
-                        'woff' => 'data:application/x-font-woff',
-                        'ttf' => 'data:application/x-font-ttf',
-                        'ttc' => 'data:application/x-font-ttf',
-                        'otf' => 'data:application/x-font-otf',
-                        'eot' => 'data:application/vnd.ms-fontobject',
-                        'woff2' => 'data:application/font-woff2',
-                        'tif' => 'image/tiff',
-                        'tiff' => 'image/tiff',
-                        'xbm' => 'image/x-xbitmap',
-                    );
-        
-        $minify->setImportExtensions($extensions);
-        
-        return $this->offer($minify, $files);
+
+        $minify->setImportExtensions(
+            array(
+                'gif' => 'data:image/gif',
+                'png' => 'data:image/png',
+                'jpe' => 'data:image/jpeg',
+                'jpg' => 'data:image/jpeg',
+                'jpeg' => 'data:image/jpeg',
+                'svg' => 'data:image/svg+xml',
+                'woff' => 'data:application/x-font-woff',
+                'ttf' => 'data:application/x-font-ttf',
+                'ttc' => 'data:application/x-font-ttf',
+                'otf' => 'data:application/x-font-otf',
+                'eot' => 'data:application/vnd.ms-fontobject',
+                'woff2' => 'data:application/font-woff2',
+                'tif' => 'image/tiff',
+                'tiff' => 'image/tiff',
+                'xbm' => 'image/x-xbitmap',
+            )
+        );
+
+        $minify->add($files);
+
+        return $this->offer(
+            $minify,
+            $files,
+            array(
+                'Content-type' => 'text/css'
+            )
+        );
     }
-    
+
+    /**
+     * js loader
+     *
+     * @param array $files
+     * @return string
+     */
     public function js(array $files)
     {
-        header('Content-type: text/javascript');
         $minify = new Minify\JS();
-        
-        return $this->offer($minify, $files);
+
+        return $this->offer(
+            $minify,
+            $files,
+            array(
+                'Content-type' => 'text/javascript'
+            )
+        );
     }
-    
-    private function offer($minify, $files)
+
+    private function offer($minify, $files, $header = array())
     {
+        header("Expires: ".gmdate('D, d M Y H:i:s', time() + $this->opts['timeout'])." GMT", true);
+        header("Last-Modified: ".gmdate('D, d M Y H:i:s', time())." GMT", true);
+        header("Cache-Control: max-age=".$this->opts['maxAge'], true);
+        header("Pragma: cache", true);
+
         $minify->add($files);
-        
-        $buffer = $this->opts['gzip'] ? $minify->gzip($this->path, (int) $this->opts['gzip']) : $minify->minify($this->path);
-        
-        $this->http_header();
-        if ($this->opts['etag']) {
-            header("Etag: ".md5($buffer));
+
+        $buffer = $this->opts['gzip']
+            ? $minify->gzip(
+                $this->path,
+                (int) $this->opts['gzip']
+            )
+            : $minify->minify(
+                $this->path
+            );
+
+        foreach ($header as $key => $value) {
+            header("$key: $value", true);
         }
-        
-        return $buffer;
-    }
-    
-    private function http_header()
-    {
-        header("Expires: ".gmdate('D, d M Y H:i:s', time() + $this->opts['timeout'])." GMT");
-        header("Last-Modified: ".gmdate('D, d M Y H:i:s', time())." GMT");
-        header("Cache-Control: max-age=".$this->opts['maxAge']);
-        header("Pragma: cache");
+
+        if ($this->opts['etag']) {
+            header("Etag: " . md5($buffer), true);
+        }
         session_cache_limiter('public');
+
+        return $buffer;
     }
 }

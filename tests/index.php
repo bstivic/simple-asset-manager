@@ -1,8 +1,8 @@
 <?php
 
-require '../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
-$a = new App\Serve();
+$a = new Simple\Asset\Serve();
 
 $css = array(
            'css/1.css',
@@ -14,8 +14,8 @@ $js = array(
            'js/2.js'
            );
 
-$f = array_map(function($n){
-        return __DIR__ .'/file/'. $n;
-    }, $css);
-           
-echo $a->css($f);
+$f = array_map(function ($n) {
+    return __DIR__ . '/file/'. $n;
+}, $js);
+
+echo $a->js($f);
